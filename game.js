@@ -1,3 +1,29 @@
+const STATE = {
+  idle: 0,
+  walking: 1,
+  jumping: 2,
+};
+const TILE = {
+  1: [1, 1],
+  2: [1, 0], // Floor top
+  a: [2, 1], // Wall left
+  b: [0, 1], // Wall right
+  c: [3, 1], // Corner bottom-left
+  d: [4, 1], // Corner bottom-right
+  e: [3, 0], // Corner top-left
+  f: [4, 0], // Corner top-right
+  8: [1, 2], // Floor bottom
+  g: [0, 0], // Swing top-left
+  h: [2, 0], // Swing top-right
+  i: [0, 2], // Swing bottom-left
+  j: [2, 2], // swing bottom-right
+  x: [3, 2], // PC1
+  y: [4, 2], // PC2
+  z: [5, 2], // PC3
+  X: [3, 3], // PC4
+  Y: [4, 3], // PC5
+  Z: [5, 3], // PC6
+};
 class Game {
   constructor() {
     // Canvas
@@ -28,34 +54,37 @@ class Game {
     this.map = map.split("\n");
     for (let y = 0; y < this.map.length; y++) {
       for (let x = 0; x < this.map[y].length; x++) {
-        const tile = +this.map[y][x];
+        const tile = this.map[y][x];
         const TILE_SIZE = 50;
         const t = new Tile(x, y, TILE_SIZE, TILE_SIZE, "green");
+        t.setTile(TILE[tile]);
         // Draw tiles
-        if (tile === 1) {
+        if (tile === "1") {
           // Ground
           t.setColor("darkgray");
           this.tiles.push(t);
-        } else if (tile === 2) {
+        } else if (tile === "2") {
           // Floor/Wall
           t.setColor("gray");
           this.tiles.push(t);
-        } else if (tile === 3) {
+        } else if (tile === "3") {
           // Hidden Floor
           t.setColor("black");
           this.tiles.push(t);
-        } else if (tile === 4) {
+        } else if (tile === "4") {
           // Hollow Floor/Wall
           t.setColor("gray");
           this.tiles.push(t);
-        } else if (tile === 9) {
+        } else if (tile === "9") {
           // PC
           t.setColor("blue");
           this.tiles.push(t);
+        } else if (tile != "0") {
+          this.tiles.push(t);
         }
         // Collision objects/entities
-        const collisionTiles = [1, 2, 3];
-        if (collisionTiles.includes(tile)) {
+        const nonCollisionTiles = ["9", "4", "0", "x", "y", "z", "X", "Y", "Z"];
+        if (!nonCollisionTiles.includes(tile)) {
           this.entities.push(t);
         }
       }
@@ -109,16 +138,16 @@ class Game {
     // Jump
     if (this.player.movement.up && this.player.jump_cooldown == 0)
       this.player.gravity = -7;
+    if (this.player.movement.right || this.player.movement.left)
+      this.player.state = STATE.walking;
     // Horizontal movement
     if (this.player.movement.left) {
       this.player.force.dx -= 4;
       this.player.facing = -1;
-      this.player.playAnimation();
     }
     if (this.player.movement.right) {
       this.player.force.dx += 4;
       this.player.facing = 1;
-      this.player.playAnimation();
     }
     // Gravity
     this.player.force.dy += this.player.gravity;
@@ -197,6 +226,8 @@ class Tile {
     this.color = color; // change to sprite later on
     // sprite
     this.loadSprite();
+    this.sx = 0;
+    this.sy = 0;
   }
   loadSprite() {
     // Check for existing sprite
@@ -206,17 +237,40 @@ class Tile {
         // loaded image
         console.log(Tile.sprite.src);
       };
-      Tile.sprite.src = "frame.png";
+      Tile.sprite.src = "tiles.png";
     }
   }
   draw(ctx, scroll) {
     ctx.beginPath();
-    ctx.fillStyle = this.color;
+    if (this.tileType !== undefined) {
+      this.sx = this.tileType[0] * 16 + this.tileType[0] * 1;
+      this.sy = this.tileType[1] * 16 + this.tileType[1] * 1;
+    }
+    ctx.drawImage(
+      Tile.sprite,
+      this.sx,
+      this.sy,
+      16, // sprite width
+      16, // sprite height
+      this.x - scroll.x,
+      this.y - scroll.y,
+      this.width,
+      this.height
+    );
+    ctx.closePath();
+
+    ctx.beginPath();
+    ctx.strokeStyle = this.color;
     ctx.rect(this.x - scroll.x, this.y - scroll.y, this.width, this.height);
-    ctx.fill();
+    // ctx.stroke();
   }
   setColor(color) {
     this.color = color;
+  }
+  setTile(tile) {
+    if (tile !== undefined) {
+      this.tileType = tile;
+    }
   }
 }
 class Player extends Tile {
@@ -235,9 +289,11 @@ class Player extends Tile {
     // load sprite
     this.loadSprite();
     this.animateFrame = 0;
-    this.maxFrame = 4;
+    this.maxFrame = 9;
     this.frameTime = 0;
     this.frameTimeCooldown = 14;
+    this.state = 0;
+    this.animationState = 32 * 2;
   }
   loadSprite() {
     // Check for existing sprite
@@ -252,14 +308,16 @@ class Player extends Tile {
   }
   draw(ctx, scroll) {
     ctx.beginPath();
-    ctx.fillStyle = "pink" || this.color;
+    ctx.strokeStyle = "red" || this.color;
     ctx.rect(this.x - scroll.x, this.y - scroll.y, this.width, this.height);
-    ctx.fill();
+    ctx.stroke();
     this.animate(ctx, scroll);
   }
   playAnimation() {
     if (this.frameTime >= this.frameTimeCooldown) {
       this.animateFrame = (this.animateFrame + 1) % this.maxFrame;
+      if (this.animateFrame == 0 && this.state == STATE.walking)
+        this.animateFrame = 1;
       this.frameTime = 0;
     }
   }
@@ -268,10 +326,20 @@ class Player extends Tile {
       this.frameTime++;
     }
     ctx.beginPath();
+    if (this.state == STATE.idle) {
+      this.animationState = this.facing == 1 ? 32 * 2 : 0;
+      this.maxFrame = 4;
+      this.frameTimeCooldown = 20;
+    } else if (this.state == STATE.walking) {
+      this.animationState = this.facing == 1 ? 32 * 3 : 0;
+      this.maxFrame = 9;
+      this.frameTimeCooldown = 14;
+    }
+    game.player.animateFrame %= game.player.maxFrame;
     ctx.drawImage(
       Player.sprite,
       2 + (14 * this.animateFrame + 2 * this.animateFrame),
-      this.facing == 1 ? 32 : 0,
+      this.animationState,
       14, // sprite width
       32, // sprite height
       this.x - scroll.x,
@@ -280,6 +348,7 @@ class Player extends Tile {
       this.height + 20
     );
     ctx.closePath();
+    this.playAnimation();
   }
 }
 const game = new Game();
@@ -311,12 +380,14 @@ function keyUpHandler(event) {
   switch (event.keyCode) {
     case 37:
       game.player.movement.left = false;
+      game.player.state = STATE.idle;
       break;
     case 38:
       game.player.movement.up = false;
       break;
     case 39:
       game.player.movement.right = false;
+      game.player.state = STATE.idle;
       break;
     case 40:
       game.player.movement.down = false;
