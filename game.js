@@ -32,18 +32,30 @@ class Game {
         const TILE_SIZE = 50;
         const t = new Tile(x, y, TILE_SIZE, TILE_SIZE, "green");
         // Draw tiles
-        if (tile === 2) {
-          t.setColor("gray");
-          this.tiles.push(t);
-        } else if (tile === 1) {
+        if (tile === 1) {
+          // Ground
           t.setColor("darkgray");
           this.tiles.push(t);
+        } else if (tile === 2) {
+          // Floor/Wall
+          t.setColor("gray");
+          this.tiles.push(t);
+        } else if (tile === 3) {
+          // Hidden Floor
+          t.setColor("black");
+          this.tiles.push(t);
+        } else if (tile === 4) {
+          // Hollow Floor/Wall
+          t.setColor("gray");
+          this.tiles.push(t);
         } else if (tile === 9) {
+          // PC
           t.setColor("blue");
           this.tiles.push(t);
         }
         // Collision objects/entities
-        if (tile !== 0 && tile !== 9) {
+        const collisionTiles = [1, 2, 3];
+        if (collisionTiles.includes(tile)) {
           this.entities.push(t);
         }
       }
@@ -78,6 +90,13 @@ class Game {
     this.scroll.y += parseInt(
       ((this.player.y - this.scroll.y - 300) / 20) * this.gametime
     );
+    // Limit scroll view to the map on x coordinate, snaps to place
+    if (this.player.x <= 700 && this.scroll.x < 0) {
+      this.scroll.x = 0;
+    }
+    if (this.player.x >= 3000 && this.scroll.x > 3400) {
+      this.scroll.x = 3400;
+    }
     // Player loop
     this.movePlayer();
     this.player.draw(this.ctx, this.scroll);
