@@ -1,13 +1,20 @@
 import React, { useRef, useEffect } from "react";
 import { map } from "./map";
 import Game, { STATE } from "./game";
-
+// Extend the window interface with game
+declare global {
+  interface Window {
+    game: any;
+  }
+}
 const Canvas = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const width = 900;
+  const height = 600;
   useEffect(() => {
     const canvas = canvasRef.current;
     const game = new Game();
-
+    window.game = game; // Make it possible to access game from console devtools
     const keyDownHandler = (event: KeyboardEvent) => {
       switch (event.key) {
         case "ArrowLeft":
@@ -53,7 +60,7 @@ const Canvas = () => {
     }
   }, []);
 
-  return <canvas ref={canvasRef} width="900" height="600" />;
+  return <canvas ref={canvasRef} width={width} height={height} />;
 };
 
 export default Canvas;
