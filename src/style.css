@@ -1,4 +1,12 @@
+* { box-sizing: border-box; padding: 0; margin: 0; }
+body > div {
+	height: 100vh;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
 canvas {
+	background-color: #000;
 	image-rendering: -moz-crisp-edges;
 	image-rendering: -webkit-crisp-edges;
 	image-rendering: pixelated;
