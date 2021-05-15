@@ -35,7 +35,7 @@ class Game {
     this.width = 900;
     this.height = 600;
     // Player
-    this.player = new Player(100, 100, 40, 90, "red");
+    this.player = new Player(100, 600, 40, 90, "red");
     // Tiles & entities/collisionobjects
     this.tiles = [];
     this.entities = [];
@@ -123,12 +123,11 @@ class Game {
       ((this.player.y - this.scroll.y - 300) / 20) * this.gametime
     );
     // Limit scroll view to the map on x coordinate, snaps to place
-    if (this.player.x <= 700 && this.scroll.x < 0) {
-      this.scroll.x = 0;
-    }
-    if (this.player.x >= 3000 && this.scroll.x > 3400) {
+    if (this.player.x <= 700 && this.scroll.x < 0) this.scroll.x = 0;
+    else if (this.player.x >= 3000 && this.scroll.x > 3400)
       this.scroll.x = 3400;
-    }
+    // Limit scroll view to the map on y coordinate, snaps to place at bottom
+    if (this.player.y >= 1400 && this.scroll.y > 1100) this.scroll.y = 1100;
     // Player loop
     this.movePlayer();
     this.player.draw(this.ctx, this.scroll);
