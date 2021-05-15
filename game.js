@@ -23,6 +23,9 @@ const TILE = {
   X: [3, 3], // PC4
   Y: [4, 3], // PC5
   Z: [5, 3], // PC6
+  m: [0, 3], // Platform left
+  n: [1, 3], // Platform middle
+  o: [2, 3], // Platform right
 };
 class Game {
   constructor() {
@@ -289,7 +292,7 @@ class Player extends Tile {
     // load sprite
     this.loadSprite();
     this.animateFrame = 0;
-    this.maxFrame = 9;
+    this.maxFrame = 8;
     this.frameTime = 0;
     this.frameTimeCooldown = 14;
     this.state = 0;
@@ -315,9 +318,8 @@ class Player extends Tile {
   }
   playAnimation() {
     if (this.frameTime >= this.frameTimeCooldown) {
-      this.animateFrame = (this.animateFrame + 1) % this.maxFrame;
-      if (this.animateFrame == 0 && this.state == STATE.walking)
-        this.animateFrame = 1;
+      this.animateFrame = (this.animateFrame + this.facing) % this.maxFrame;
+      if (this.animateFrame < 0) this.animateFrame = this.maxFrame - 1;
       this.frameTime = 0;
     }
   }
@@ -327,12 +329,12 @@ class Player extends Tile {
     }
     ctx.beginPath();
     if (this.state == STATE.idle) {
-      this.animationState = this.facing == 1 ? 32 * 2 : 0;
+      this.animationState = this.facing == 1 ? 32 * 0 : 32 * 1;
       this.maxFrame = 4;
       this.frameTimeCooldown = 20;
     } else if (this.state == STATE.walking) {
-      this.animationState = this.facing == 1 ? 32 * 3 : 0;
-      this.maxFrame = 9;
+      this.animationState = this.facing == 1 ? 32 * 2 : 32 * 3;
+      this.maxFrame = 8;
       this.frameTimeCooldown = 14;
     }
     game.player.animateFrame %= game.player.maxFrame;
