@@ -59,13 +59,12 @@ const CanvasController: React.FC<canvasControllerType> = ({ setPopup }) => {
       }
     };
     if (canvas) {
-      window.addEventListener("load", function () {
-        game.init(canvas, map);
-        game.draw();
-        setTimeout(() => console.log(game), 500);
-        document.addEventListener("keydown", keyDownHandler, false);
-        document.addEventListener("keyup", keyUpHandler, false);
-      });
+      console.log("LOAD");
+      game.init(canvas, map);
+      game.draw();
+      setTimeout(() => console.log(game), 500);
+      document.addEventListener("keydown", keyDownHandler, false);
+      document.addEventListener("keyup", keyUpHandler, false);
     }
   }, [game]);
 
