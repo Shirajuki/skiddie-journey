@@ -1,10 +1,14 @@
-import React from "react";
-import Canvas from "./components/Canvas";
+import React, { useState } from "react";
+import CanvasController from "./components/CanvasController";
+import ModalWindow from "./components/ModalWindow";
 
 const App = () => {
+  const [popup, setPopup] = useState<boolean>(false);
+
   return (
     <div className="App">
-      <Canvas />
+      <ModalWindow popup={popup} setPopup={setPopup} />
+      <CanvasController setPopup={setPopup} />
     </div>
   );
 };

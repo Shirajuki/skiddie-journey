@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import { map } from "./map";
 import Game, { STATE } from "./game";
 // Extend the window interface with game
@@ -7,13 +7,18 @@ declare global {
     game: any;
   }
 }
-const Canvas = () => {
+
+type canvasControllerType = {
+  setPopup: (popup: boolean) => void;
+};
+const CanvasController: React.FC<canvasControllerType> = ({ setPopup }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [game] = useState<any>(new Game());
   const width = 900;
   const height = 600;
+
   useEffect(() => {
     const canvas = canvasRef.current;
-    const game = new Game();
     window.game = game; // Make it possible to access game from console devtools
     const keyDownHandler = (event: KeyboardEvent) => {
       switch (event.key) {
@@ -47,6 +52,10 @@ const Canvas = () => {
         case "ArrowDown":
           game.player.movement.down = false;
           break;
+        case "e":
+          console.log("[INTERACT]...");
+          setPopup(true);
+          break;
       }
     };
     if (canvas) {
@@ -58,9 +67,9 @@ const Canvas = () => {
         document.addEventListener("keyup", keyUpHandler, false);
       });
     }
-  }, []);
+  }, [game]);
 
   return <canvas ref={canvasRef} width={width} height={height} />;
 };
 
-export default Canvas;
+export default CanvasController;
