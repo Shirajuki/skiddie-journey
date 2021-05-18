@@ -66,7 +66,7 @@ const CanvasController: React.FC<canvasControllerType> = ({ setPopup }) => {
       document.addEventListener("keydown", keyDownHandler, false);
       document.addEventListener("keyup", keyUpHandler, false);
     }
-  }, [game]);
+  }, [game, setPopup]);
 
   return <canvas ref={canvasRef} width={width} height={height} />;
 };

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useSupabase, useUser } from "use-supabase";
+import { useSupabase } from "use-supabase";
 import CanvasController from "./components/CanvasController";
 import ModalWindow from "./components/ModalWindow";
 
@@ -15,10 +15,10 @@ const App = () => {
         .from("puzzles")
         .select("*")
         .filter("topic", "eq", topic);
-      console.log(data);
+      console.log(data, error);
     };
     test();
-  }, []);
+  }, [supabase]);
 
   useEffect(() => {
     if (!user) {
@@ -36,7 +36,18 @@ const App = () => {
         authListener?.unsubscribe();
       };
     }
-  }, [user]);
+    // If no user found in session, log in
+    if (!user) {
+      const login = async () => {
+        const { user: lUser } = await supabase.auth.signIn({
+          email: "test@email.com",
+          password: "example-password",
+        });
+        setUser(lUser);
+      };
+      login();
+    }
+  }, [user, supabase.auth]);
 
   return (
     <div className="App">

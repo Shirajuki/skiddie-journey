@@ -50,7 +50,7 @@ const ModalWindow: React.FC<modalType> = ({ popup, setPopup }) => {
 
   useEffect(() => {
     checkTodoComplete();
-  }, []);
+  }, [checkTodoComplete]);
 
   const addTodo = async () => {
     const answer: string = input.trim();
