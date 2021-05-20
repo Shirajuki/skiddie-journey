@@ -5,7 +5,7 @@ export interface IPuzzle {
   tag: string;
   points: number;
   description: string;
-  completed: boolean;
+  completed?: boolean;
 }
 export interface IContent {
   topic: string;

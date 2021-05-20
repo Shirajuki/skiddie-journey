@@ -1,50 +1,10 @@
 import React, { useState, useRef, useEffect } from "react";
-import { useSupabase, useUser } from "use-supabase";
+import { useUser } from "use-supabase";
 import { IContent, IPuzzle } from "../../types";
+import { getPuzzlesByTopic, addTodo, checkPuzzleFlag } from "../../utils/db";
 import Popup from "reactjs-popup";
 import "reactjs-popup/dist/index.css";
 import "./index.css";
-
-const loadContent = (setContent, setPuzzle) => {
-  const topic = "it";
-  const content: IContent = {
-    topic: topic,
-    contents: [
-      {
-        topic: "it",
-        id: "1",
-        title: "Binary",
-        tag: "general-skills",
-        points: 10,
-        completed: false,
-        description:
-          "Lorem ipsum dolor sit amet consectetur adipisicing elit. Atque, a nostrum. Dolorem, repellat quidem ut, minima sint vel eveniet quibusdam voluptates delectus doloremque, explicabo tempore dicta adipisci fugit amet dignissimos?",
-      },
-      {
-        topic: "it",
-        id: "2",
-        title: "Hexadecimal",
-        tag: "general-skills",
-        points: 10,
-        completed: true,
-        description:
-          "Lorem ipsum dolor sit amet consectetur adipisicing elit. Atque, a nostrum. Dolorem, repellat quidem ut, minima sint vel eveniet quibusdam voluptates delectus doloremque, explicabo tempore dicta adipisci fugit amet dignissimos?",
-      },
-      {
-        topic: "it",
-        id: "3",
-        title: "All the Bases there is",
-        tag: "general-skills",
-        points: 10,
-        completed: false,
-        description:
-          "Lorem ipsum dolor sit amet consectetur adipisicing elit. Atque, a nostrum. Dolorem, repellat quidem ut, minima sint vel eveniet quibusdam voluptates delectus doloremque, explicabo tempore dicta adipisci fugit amet dignissimos?",
-      },
-    ],
-  };
-  setContent(content);
-  setPuzzle(content.contents[0]);
-};
 
 type modalType = {
   popup: boolean;
@@ -55,9 +15,7 @@ const ModalWindow: React.FC<modalType> = ({ popup, setPopup }) => {
   const [puzzle, setPuzzle] = useState<IPuzzle>();
   const [error, setError] = useState<string>();
   const [input, setInput] = useState<string>();
-  const [completed, setCompleted] = useState<boolean>(false);
   const inputRef = useRef(null);
-  const supabase = useSupabase();
   const user = useUser();
 
   const isCompleted = () => {
@@ -69,34 +27,28 @@ const ModalWindow: React.FC<modalType> = ({ popup, setPopup }) => {
     if (puzzle) return puzzle.id === id;
     return false;
   };
-  useEffect(() => {
-    const checkTodoComplete = async () => {
-      let { data: todos } = await supabase
-        .from("todos")
-        .select("id")
-        .filter("user_id", "eq", user.id)
-        .single();
-      setCompleted(!!todos?.id);
-      console.log(todos, !!todos?.id);
-    };
-    checkTodoComplete();
-    loadContent(setContent, setPuzzle);
-  }, [supabase, user]);
 
-  const addTodo = async () => {
+  useEffect(() => {
+    const topic = "it";
+    getPuzzlesByTopic(topic).then((data: IPuzzle[]) => {
+      const content: IContent = {
+        topic: topic,
+        contents: data,
+      };
+      setContent(content);
+      setPuzzle(content?.contents[0]);
+    });
+  }, []);
+
+  const add = () => {
+    const input: string = inputRef.current.value;
     const answer: string = input.trim();
-    if (answer.length > 0 && !completed) {
-      let { data: todo, error } = await supabase
-        .from("todos")
-        .insert({ user_id: user.id, puzzle: puzzle.id })
-        .single();
-      if (error) setError(error.message);
-      else {
-        console.log(todo);
-        setError(null);
-        inputRef.current.value = "";
-      }
-    }
+    addTodo(puzzle.id, answer, user).then(({ data, error }) => {
+      if (data) puzzle.completed = true;
+      if (error && error !== "") setError(error);
+      else setError(null);
+      inputRef.current.value = "";
+    });
   };
   const inputHandler = (event: any) => {
     setInput(event.target.value);
@@ -218,7 +170,7 @@ const ModalWindow: React.FC<modalType> = ({ popup, setPopup }) => {
                     <button
                       className="button"
                       onClick={() => {
-                        if (!isCompleted()) addTodo();
+                        if (!isCompleted()) add();
                       }}
                     >
                       Submit
