@@ -13,7 +13,7 @@ const App = () => {
     const test = async () => {
       let { data, error } = await supabase
         .from("puzzles")
-        .select("*")
+        .select("id, topic, title, tag, points, description")
         .filter("topic", "eq", topic);
       console.log(data, error);
     };

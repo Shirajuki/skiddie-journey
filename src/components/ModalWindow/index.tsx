@@ -66,12 +66,12 @@ const ModalWindow: React.FC<modalType> = ({ popup, setPopup }) => {
   };
 
   const isActive = (id: string) => {
-    if (puzzle) return puzzle.id == id;
+    if (puzzle) return puzzle.id === id;
     return false;
   };
   useEffect(() => {
     const checkTodoComplete = async () => {
-      let { data: todos, error } = await supabase
+      let { data: todos } = await supabase
         .from("todos")
         .select("id")
         .filter("user_id", "eq", user.id)
@@ -81,7 +81,7 @@ const ModalWindow: React.FC<modalType> = ({ popup, setPopup }) => {
     };
     checkTodoComplete();
     loadContent(setContent, setPuzzle);
-  }, []);
+  }, [supabase, user]);
 
   const addTodo = async () => {
     const answer: string = input.trim();
@@ -100,6 +100,7 @@ const ModalWindow: React.FC<modalType> = ({ popup, setPopup }) => {
   };
   const inputHandler = (event: any) => {
     setInput(event.target.value);
+    console.log(error);
   };
 
   return (
