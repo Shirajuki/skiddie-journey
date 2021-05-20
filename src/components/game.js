@@ -1,8 +1,6 @@
-export const STATE = {
-  idle: 0,
-  walking: 1,
-  jumping: 2,
-};
+// TODO:
+// - Typescript this?
+// - Tile design as of now, will be fixing dynamic tiles later on
 const TILE = {
   1: [1, 1],
   2: [1, 0], // Floor top
@@ -26,6 +24,11 @@ const TILE = {
   m: [0, 3], // Platform left
   n: [1, 3], // Platform middle
   o: [2, 3], // Platform right
+};
+export const STATE = {
+  idle: 0,
+  walking: 1,
+  jumping: 2,
 };
 export default class Game {
   constructor() {

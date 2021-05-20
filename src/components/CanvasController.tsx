@@ -54,6 +54,7 @@ const CanvasController: React.FC<canvasControllerType> = ({ setPopup }) => {
           break;
         case "e":
           console.log("[INTERACT]...");
+          // Check position of PCs and edit topic state accordingly, before setting popup to true
           setPopup(true);
           break;
       }

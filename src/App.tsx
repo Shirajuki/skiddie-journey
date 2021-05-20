@@ -9,18 +9,6 @@ const App = () => {
   const [user, setUser] = useState<any>(null);
 
   useEffect(() => {
-    const topic = "it";
-    const test = async () => {
-      let { data, error } = await supabase
-        .from("puzzles")
-        .select("id, topic, title, tag, points, description")
-        .filter("topic", "eq", topic);
-      console.log(data, error);
-    };
-    test();
-  }, [supabase]);
-
-  useEffect(() => {
     if (!user) {
       // Get user from session
       const session = supabase.auth.session();

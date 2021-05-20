@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useUser } from "use-supabase";
 import { IContent, IPuzzle } from "../../types";
-import { getPuzzlesByTopic, addTodo, checkPuzzleFlag } from "../../utils/db";
+import { getPuzzlesByTopic, addTodo } from "../../utils/db";
 import Popup from "reactjs-popup";
 import "reactjs-popup/dist/index.css";
 import "./index.css";
@@ -17,6 +17,7 @@ const ModalWindow: React.FC<modalType> = ({ popup, setPopup }) => {
   const [input, setInput] = useState<string>();
   const inputRef = useRef(null);
   const user = useUser();
+  const topic = "it"; // Get this from state management, Redux
 
   const isCompleted = () => {
     if (puzzle) return puzzle.completed;
@@ -29,7 +30,6 @@ const ModalWindow: React.FC<modalType> = ({ popup, setPopup }) => {
   };
 
   useEffect(() => {
-    const topic = "it";
     getPuzzlesByTopic(topic).then((data: IPuzzle[]) => {
       const content: IContent = {
         topic: topic,
@@ -41,7 +41,6 @@ const ModalWindow: React.FC<modalType> = ({ popup, setPopup }) => {
   }, []);
 
   const add = () => {
-    const input: string = inputRef.current.value;
     const answer: string = input.trim();
     addTodo(puzzle.id, answer, user).then(({ data, error }) => {
       if (data) puzzle.completed = true;
