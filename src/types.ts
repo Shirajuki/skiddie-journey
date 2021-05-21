@@ -11,3 +11,7 @@ export interface IContent {
   topic: string;
   contents: IPuzzle[];
 }
+
+export interface ICompleted {
+  puzzle_id: string;
+}

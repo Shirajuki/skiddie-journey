@@ -17,18 +17,18 @@ export const getPuzzles = async () => {
   return data;
 };
 
-export const getCompleted = async () => {
+export const getCompletedPuzzles = async () => {
   let { data, error } = await supabase
-    .from("todos")
-    .select("id, topic, title, tag, points, description");
+    .from("completed_puzzles")
+    .select("puzzle_id");
   if (error) console.log(error);
   return data;
 };
 
-export const checkComplete = async (puzzle_id: string, user: any) => {
+export const checkPuzzleComplete = async (puzzle_id: string, user: any) => {
   let { data, error } = await supabase
-    .from("todos")
-    .select("id")
+    .from("completed_puzzles")
+    .select("user_id")
     .filter("user_id", "eq", user?.id)
     .filter("puzzle_id", "eq", puzzle_id)
     .single();
@@ -38,10 +38,14 @@ export const checkComplete = async (puzzle_id: string, user: any) => {
 };
 
 // Inserts answer if flag given is correct, works serverless thanks to PostgreSQL trigger
-export const addTodo = async (puzzle_id: string, answer: string, user: any) => {
+export const addPuzzleComplete = async (
+  puzzle_id: string,
+  answer: string,
+  user: any
+) => {
   if (answer.length > 0) {
     let { data, error } = await supabase
-      .from("todos")
+      .from("completed_puzzles")
       .insert({ user_id: user?.id, puzzle_id: puzzle_id, flag: answer })
       .single();
     if (error) console.log(error.message);

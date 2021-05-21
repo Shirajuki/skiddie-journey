@@ -1,7 +1,11 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useUser } from "use-supabase";
-import { IContent, IPuzzle } from "../../types";
-import { getPuzzlesByTopic, addTodo } from "../../utils/db";
+import { IContent, IPuzzle, ICompleted } from "../../types";
+import {
+  getPuzzlesByTopic,
+  getCompletedPuzzles,
+  addPuzzleComplete,
+} from "../../utils/db";
 import Popup from "reactjs-popup";
 import "reactjs-popup/dist/index.css";
 import "./index.css";
@@ -28,8 +32,9 @@ const ModalWindow: React.FC<modalType> = ({ popup, setPopup }) => {
     if (puzzle) return puzzle.id === id;
     return false;
   };
-
+  // useEffect on mount or topic is changed
   useEffect(() => {
+    // Get all puzzles by given topic
     getPuzzlesByTopic(topic).then((data: IPuzzle[]) => {
       const content: IContent = {
         topic: topic,
@@ -37,12 +42,22 @@ const ModalWindow: React.FC<modalType> = ({ popup, setPopup }) => {
       };
       setContent(content);
       setPuzzle(content?.contents[0]);
+
+      // Check and update completion on content puzzles
+      getCompletedPuzzles().then((data: any[]) => {
+        const completedPuzzles = data.map((item: ICompleted) => item.puzzle_id);
+        console.log(completedPuzzles, content);
+        content?.contents?.forEach((data) => {
+          data.completed = completedPuzzles.includes(data.id);
+        });
+        setPuzzle(content?.contents[0]); // Update puzzle once again
+      });
     });
-  }, []);
+  }, [topic]);
 
   const add = () => {
     const answer: string = input.trim();
-    addTodo(puzzle.id, answer, user).then(({ data, error }) => {
+    addPuzzleComplete(puzzle.id, answer, user).then(({ data, error }) => {
       if (data) puzzle.completed = true;
       if (error && error !== "") setError(error);
       else setError(null);
@@ -51,7 +66,6 @@ const ModalWindow: React.FC<modalType> = ({ popup, setPopup }) => {
   };
   const inputHandler = (event: any) => {
     setInput(event.target.value);
-    console.log(error);
   };
 
   return (
