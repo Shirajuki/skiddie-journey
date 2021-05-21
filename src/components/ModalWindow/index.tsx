@@ -7,14 +7,14 @@ import {
   addPuzzleComplete,
 } from "../../utils/db";
 import Popup from "reactjs-popup";
-import { useRecoilState } from "recoil";
+import { useRecoilState, useRecoilValue } from "recoil";
 import { popupState, topicState } from "../../recoil/atoms";
 import "reactjs-popup/dist/index.css";
 import "./index.css";
 
 const ModalWindow: React.FC = () => {
   const [popup, setPopup] = useRecoilState(popupState);
-  const [topic, _] = useRecoilState(topicState);
+  const topic = useRecoilValue(topicState);
   const [content, setContent] = useState<IContent>();
   const [puzzle, setPuzzle] = useState<IPuzzle>();
   const [error, setError] = useState<string>();

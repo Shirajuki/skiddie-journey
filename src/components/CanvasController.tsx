@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState } from "react";
-import { useRecoilState } from "recoil";
+import { useRecoilState, useSetRecoilState } from "recoil";
 import { popupState, topicState } from "../recoil/atoms";
 import { map } from "./map";
 import Game, { STATE } from "./game";
@@ -12,29 +12,33 @@ declare global {
 
 const CanvasController: React.FC = () => {
   const [popup, setPopup] = useRecoilState(popupState);
-  const [_, setTopic] = useRecoilState(topicState);
+  const setTopic = useSetRecoilState(topicState);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const popupRef = useRef<boolean>(null);
   const [game] = useState<any>(new Game());
   const width = 900;
   const height = 600;
 
+  popupRef.current = popup;
   useEffect(() => {
     const canvas = canvasRef.current;
     window.game = game; // Make it possible to access game from console devtools
     const keyDownHandler = (event: KeyboardEvent) => {
-      switch (event.key) {
-        case "ArrowLeft":
-          game.player.movement.left = true;
-          break;
-        case "ArrowUp":
-          game.player.movement.up = true;
-          break;
-        case "ArrowRight":
-          game.player.movement.right = true;
-          break;
-        case "ArrowDown":
-          game.player.movement.down = true;
-          break;
+      if (!popupRef.current) {
+        switch (event.key) {
+          case "ArrowLeft":
+            game.player.movement.left = true;
+            break;
+          case "ArrowUp":
+            game.player.movement.up = true;
+            break;
+          case "ArrowRight":
+            game.player.movement.right = true;
+            break;
+          case "ArrowDown":
+            game.player.movement.down = true;
+            break;
+        }
       }
     };
     const keyUpHandler = (event: KeyboardEvent) => {
@@ -55,7 +59,7 @@ const CanvasController: React.FC = () => {
           break;
         case "e":
           // Check position of PCs and edit topic state accordingly, before setting popup to true
-          if (!popup) {
+          if (!popupRef.current) {
             const pos = {
               x: Math.round(game.player.x / 50),
               y: Math.round(game.player.y / 50),
@@ -92,7 +96,7 @@ const CanvasController: React.FC = () => {
       document.addEventListener("keydown", keyDownHandler, false);
       document.addEventListener("keyup", keyUpHandler, false);
     }
-  }, [game, setPopup]);
+  }, [game, setPopup, setTopic]);
 
   return <canvas ref={canvasRef} width={width} height={height} />;
 };
