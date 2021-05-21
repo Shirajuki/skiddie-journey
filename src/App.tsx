@@ -42,7 +42,7 @@ const App = () => {
       {user ? (
         <>
           <ModalWindow popup={popup} setPopup={setPopup} />
-          <CanvasController setPopup={setPopup} />
+          <CanvasController popup={popup} setPopup={setPopup} />
         </>
       ) : (
         <h1>Add login with OAuth here :)</h1>
