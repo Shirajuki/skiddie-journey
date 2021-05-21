@@ -7,21 +7,20 @@ import {
   addPuzzleComplete,
 } from "../../utils/db";
 import Popup from "reactjs-popup";
+import { useRecoilState } from "recoil";
+import { popupState, topicState } from "../../recoil/atoms";
 import "reactjs-popup/dist/index.css";
 import "./index.css";
 
-type modalType = {
-  popup: boolean;
-  setPopup: (popup: boolean) => void;
-};
-const ModalWindow: React.FC<modalType> = ({ popup, setPopup }) => {
+const ModalWindow: React.FC = () => {
+  const [popup, setPopup] = useRecoilState(popupState);
+  const [topic, _] = useRecoilState(topicState);
   const [content, setContent] = useState<IContent>();
   const [puzzle, setPuzzle] = useState<IPuzzle>();
   const [error, setError] = useState<string>();
   const [input, setInput] = useState<string>();
   const inputRef = useRef(null);
   const user = useUser();
-  const topic = "it"; // Get this from state management, Redux
 
   const isCompleted = () => {
     if (puzzle) return puzzle.completed;

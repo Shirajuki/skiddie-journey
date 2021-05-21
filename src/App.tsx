@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { useSupabase } from "use-supabase";
+import { RecoilRoot } from "recoil";
 import CanvasController from "./components/CanvasController";
 import ModalWindow from "./components/ModalWindow";
 
 const App = () => {
-  const [popup, setPopup] = useState<boolean>(false);
   const supabase = useSupabase();
   const [user, setUser] = useState<any>(null);
 
@@ -40,10 +40,10 @@ const App = () => {
   return (
     <div className="App">
       {user ? (
-        <>
-          <ModalWindow popup={popup} setPopup={setPopup} />
-          <CanvasController popup={popup} setPopup={setPopup} />
-        </>
+        <RecoilRoot>
+          <ModalWindow />
+          <CanvasController />
+        </RecoilRoot>
       ) : (
         <h1>Add login with OAuth here :)</h1>
       )}
