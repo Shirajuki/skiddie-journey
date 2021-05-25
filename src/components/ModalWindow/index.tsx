@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useUser } from "use-supabase";
-import { IContent, IPuzzle, ICompleted } from "../../types";
+import { IContent, IPuzzle, ICompleted, IPuzzleResponse } from "../../types";
 import {
   getPuzzlesByTopic,
   getCompletedPuzzles,
@@ -9,6 +9,7 @@ import {
 import Popup from "reactjs-popup";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { popupState, topicState } from "../../recoil/atoms";
+import ErrorPopup from "../ErrorPopup";
 import "reactjs-popup/dist/index.css";
 import "./index.css";
 
@@ -34,16 +35,21 @@ const ModalWindow: React.FC = () => {
   // useEffect on mount or topic is changed
   useEffect(() => {
     // Get all puzzles by given topic
-    getPuzzlesByTopic(topic).then((data: IPuzzle[]) => {
+    getPuzzlesByTopic(topic).then(({ data, error }: IPuzzleResponse) => {
       const content: IContent = {
         topic: topic,
-        contents: data,
+        contents: data as IPuzzle[],
       };
       setContent(content);
       setPuzzle(content?.contents[0]);
 
       // Check and update completion on content puzzles
-      getCompletedPuzzles().then((data: any[]) => {
+      getCompletedPuzzles().then((res: IPuzzleResponse) => {
+        const data = res.data as ICompleted[];
+        const error2 = res.error;
+        if (error || error2) {
+          setError("ERROR ON FETCH OF TOPIC/PUZZLES");
+        } else setError(null);
         const completedPuzzles = data.map((item: ICompleted) => item.puzzle_id);
         console.log(completedPuzzles, content);
         content?.contents?.forEach((data) => {
@@ -57,9 +63,14 @@ const ModalWindow: React.FC = () => {
   const add = () => {
     const answer: string = input.trim();
     addPuzzleComplete(puzzle.id, answer, user).then(({ data, error }) => {
-      if (data) puzzle.completed = true;
-      if (error && error !== "") setError(error);
-      else setError(null);
+      if (data) {
+        puzzle.completed = true;
+        console.log("PLAY PUZZLE COMPLETE INSTANCE");
+      }
+      if (error && error.message !== "") {
+        setError(error.message);
+        console.log("PLAY ERROR INSTANCE");
+      } else setError(null);
       inputRef.current.value = "";
     });
   };
@@ -128,21 +139,18 @@ const ModalWindow: React.FC = () => {
                     <h2>{content ? content.topic : "IT"}</h2>
                   </div>
                   <div className="content">
-                    {puzzle ? (
-                      <>
-                        <span className="tag">{puzzle.tag}</span>
-                        <h1 className="title">{puzzle.title}</h1>
-                        <h3 className="points">Points: {puzzle.points}</h3>
-                        <p className="description">{puzzle.description}</p>
-                      </>
-                    ) : (
-                      <>
-                        <span className="tag">general-skills</span>
-                        <h1 className="title">Binary</h1>
-                        <h3 className="points">Points: 10</h3>
-                        <p className="description">Description text...</p>
-                      </>
-                    )}
+                    <span className="tag">
+                      {puzzle ? puzzle?.tag : "general skills"}
+                    </span>
+                    <h1 className="title">
+                      {puzzle ? puzzle?.title : "Binary"}
+                    </h1>
+                    <h3 className="points">
+                      Points: {puzzle ? puzzle?.points : "10"}
+                    </h3>
+                    <p className="description">
+                      {puzzle ? puzzle?.description : "Description..."}
+                    </p>
                   </div>
                   <div className={`actions ${isCompleted() ? "solved" : ""}`}>
                     <svg
@@ -393,8 +401,9 @@ const ModalWindow: React.FC = () => {
       {popup ? (
         <>
           <div className="blackBox top"></div>
-          <div className="fog"></div>
+          <div className={`fog ${error ? "error" : ""}`}></div>
           <div className="blackBox bottom"></div>
+          <ErrorPopup error={error}></ErrorPopup>
         </>
       ) : (
         <></>

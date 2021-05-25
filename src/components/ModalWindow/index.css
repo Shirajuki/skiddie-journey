@@ -14,7 +14,7 @@
 	bottom: 0;
 	animation: slideUp 0.7s linear forwards;
 }
-.fog {
+.fog, .fog::after {
 	position: absolute;
 	background-image: radial-gradient(rgba(58,153,158,0.75) 5.7%, transparent 60%);
 	background-position: center bottom;
@@ -29,7 +29,17 @@
 	animation-delay: 1.4s;
 	opacity: 0;
 }
-
+.fog::after {
+	content: "";
+	transform: translate(-25%, 200px);
+	transition: transform 0.5s ease-in-out;
+	opacity: 0;
+	background: radial-gradient(rgba(232, 5, 5, 0.75) 5.7%, transparent 60%);
+}
+.fog.error::after {
+	transform: translate(-25%, -20px);
+	opacity: 1;
+}
 /* ModalWindow */
 .popup-overlay {
 	transform: translateY(-25px);
