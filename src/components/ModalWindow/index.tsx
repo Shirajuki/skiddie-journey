@@ -21,6 +21,8 @@ const ModalWindow: React.FC = () => {
   const [error, setError] = useState<string>();
   const [input, setInput] = useState<string>();
   const inputRef = useRef(null);
+  const contentRef = useRef(content);
+  contentRef.current = content;
   const user = useUser();
 
   const isCompleted = () => {
@@ -32,6 +34,7 @@ const ModalWindow: React.FC = () => {
     if (puzzle) return puzzle.id === id;
     return false;
   };
+
   // useEffect on mount or topic is changed
   useEffect(() => {
     // Get all puzzles by given topic
@@ -51,13 +54,19 @@ const ModalWindow: React.FC = () => {
           setError("ERROR ON FETCH OF TOPIC/PUZZLES");
         } else setError(null);
         const completedPuzzles = data.map((item: ICompleted) => item.puzzle_id);
-        console.log(completedPuzzles, content);
+        console.log(completedPuzzles, content, completedPuzzles);
         content?.contents?.forEach((data) => {
           data.completed = completedPuzzles.includes(data.id);
         });
         setPuzzle(content?.contents[0]); // Update puzzle once again
       });
     });
+    // 1 second timer fix
+    const timer = setTimeout(() => {
+      if (contentRef.current?.contents[0])
+        setPuzzle(contentRef.current?.contents[0]); // Update puzzle after timeout
+    }, 1000);
+    return () => clearTimeout(timer);
   }, [topic]);
 
   const add = () => {
@@ -67,7 +76,7 @@ const ModalWindow: React.FC = () => {
         puzzle.completed = true;
         console.log("PLAY PUZZLE COMPLETE INSTANCE");
       }
-      if (error && error.message !== "") {
+      if (error && error?.message !== "") {
         setError(error.message);
         console.log("PLAY ERROR INSTANCE");
       } else setError(null);
@@ -95,35 +104,37 @@ const ModalWindow: React.FC = () => {
                 <div>
                   {content ? (
                     <>
-                      {content.contents.map((contentPuzzle, index) => {
-                        return (
-                          <button
-                            key={index}
-                            className={
-                              isActive(contentPuzzle.id) ? "active" : ""
-                            }
-                            onClick={() => setPuzzle(contentPuzzle)}
-                          >
-                            {contentPuzzle.title}
-                            {contentPuzzle.completed ? (
-                              <svg
-                                width="9"
-                                height="7"
-                                viewBox="0 0 9 7"
-                                fill="none"
-                                xmlns="http://www.w3.org/2000/svg"
-                              >
-                                <path
-                                  d="M6.88471 0.206803C7.02558 0.0726919 7.21303 -0.00145012 7.40753 2.14954e-05C7.60202 0.00149312 7.78833 0.0784635 7.92716 0.214691C8.06598 0.350918 8.14645 0.535747 8.15159 0.730177C8.15673 0.924607 8.08614 1.11343 7.95471 1.2568L3.96471 6.2468C3.8961 6.3207 3.81329 6.38001 3.72124 6.42117C3.62919 6.46233 3.52978 6.48451 3.42896 6.48638C3.32814 6.48825 3.22798 6.46976 3.13447 6.43204C3.04095 6.39431 2.95601 6.33811 2.88471 6.2668L0.238708 3.6208C0.165022 3.55214 0.105919 3.46934 0.0649275 3.37734C0.0239355 3.28534 0.0018935 3.18603 0.00011672 3.08533C-0.00166006 2.98462 0.0168648 2.88459 0.0545858 2.79121C0.0923068 2.69782 0.148451 2.61298 0.21967 2.54176C0.290889 2.47055 0.375723 2.4144 0.469111 2.37668C0.562499 2.33896 0.662528 2.32043 0.763231 2.32221C0.863934 2.32399 0.963247 2.34603 1.05525 2.38702C1.14725 2.42801 1.23005 2.48712 1.29871 2.5608L3.39271 4.6538L6.86571 0.228803C6.87196 0.221104 6.87864 0.213759 6.88571 0.206803H6.88471Z"
-                                  fill="#A8CED0"
-                                />
-                              </svg>
-                            ) : (
-                              <></>
-                            )}
-                          </button>
-                        );
-                      })}
+                      {contentRef.current.contents.map(
+                        (contentPuzzle, index) => {
+                          return (
+                            <button
+                              key={index}
+                              className={
+                                isActive(contentPuzzle.id) ? "active" : ""
+                              }
+                              onClick={() => setPuzzle(contentPuzzle)}
+                            >
+                              {contentPuzzle.title}
+                              {contentPuzzle.completed ? (
+                                <svg
+                                  width="9"
+                                  height="7"
+                                  viewBox="0 0 9 7"
+                                  fill="none"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                >
+                                  <path
+                                    d="M6.88471 0.206803C7.02558 0.0726919 7.21303 -0.00145012 7.40753 2.14954e-05C7.60202 0.00149312 7.78833 0.0784635 7.92716 0.214691C8.06598 0.350918 8.14645 0.535747 8.15159 0.730177C8.15673 0.924607 8.08614 1.11343 7.95471 1.2568L3.96471 6.2468C3.8961 6.3207 3.81329 6.38001 3.72124 6.42117C3.62919 6.46233 3.52978 6.48451 3.42896 6.48638C3.32814 6.48825 3.22798 6.46976 3.13447 6.43204C3.04095 6.39431 2.95601 6.33811 2.88471 6.2668L0.238708 3.6208C0.165022 3.55214 0.105919 3.46934 0.0649275 3.37734C0.0239355 3.28534 0.0018935 3.18603 0.00011672 3.08533C-0.00166006 2.98462 0.0168648 2.88459 0.0545858 2.79121C0.0923068 2.69782 0.148451 2.61298 0.21967 2.54176C0.290889 2.47055 0.375723 2.4144 0.469111 2.37668C0.562499 2.33896 0.662528 2.32043 0.763231 2.32221C0.863934 2.32399 0.963247 2.34603 1.05525 2.38702C1.14725 2.42801 1.23005 2.48712 1.29871 2.5608L3.39271 4.6538L6.86571 0.228803C6.87196 0.221104 6.87864 0.213759 6.88571 0.206803H6.88471Z"
+                                    fill="#A8CED0"
+                                  />
+                                </svg>
+                              ) : (
+                                <></>
+                              )}
+                            </button>
+                          );
+                        }
+                      )}
                     </>
                   ) : (
                     <></>
@@ -403,7 +414,7 @@ const ModalWindow: React.FC = () => {
           <div className="blackBox top"></div>
           <div className={`fog ${error ? "error" : ""}`}></div>
           <div className="blackBox bottom"></div>
-          <ErrorPopup error={error}></ErrorPopup>
+          <ErrorPopup error={error} setError={setError}></ErrorPopup>
         </>
       ) : (
         <></>
