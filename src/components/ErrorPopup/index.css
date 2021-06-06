@@ -10,7 +10,8 @@
 	z-index: 10000;
 }
 .errorPopup > .modal {
-	width: 400px;
+	flex-direction: column;
+	width: 80%;
 	height: 300px;
 	font-size: 4rem;
 	display: flex;
@@ -21,9 +22,86 @@
 	-webkit-animation: anvil 0.3s cubic-bezier(0.38, 0.1, 0.36, 0.9) forwards;
 	animation: anvil 0.3s cubic-bezier(0.38, 0.1, 0.36, 0.9) forwards;
 	animation-delay: 0.4s;
-	font-family: 'Lucida Console', monotype, sans-serif;
+	margin-bottom: 80px;
+	text-transform: uppercase;
+	font-family: 'Mr Dafoe', cursive;
 }
+.errorPopup > .modal > svg,
+.errorPopup > .modal > p {
+	transition: opacity 0.5s;
+}
+.errorPopup > .modal.faded,
+.errorPopup > .modal.faded > svg,
+.errorPopup > .modal.faded > p {
+	opacity: 0;
+	pointer-events: none;
+}
+.errorPopup > .modal > svg {
+	transform: scale(1.5,1.5);
+}
+.errorPopup > .modal > svg path.errorsvg1 {
+	fill: #0ff;
+	animation: glitch 1s cubic-bezier(.25, .46, .45, .94) both infinite;
+}
+.errorPopup > .modal > svg path.errorsvg2 {
+	fill: #f0f;
+	animation: glitch .5s cubic-bezier(.25, .46, .45, .94) reverse both infinite;
+}
+.errorPopup > .modal > p {
+	position: relative;
+	font-size: 3.5rem;
+	line-height: 80px;
+
+	text-align: center;
+	color: rgba(255, 32, 32, 0.85);
+	text-shadow: 0px 4px 50px #FF0000;
+}
+
+.errorPopup > .modal > p::before, 
+.errorPopup > .modal > p::after {
+	display: block;
+	content: attr(data-glitch);
+	text-transform: uppercase;
+	position: absolute;
+	top: 0;
+	left: 0;
+	height: 100%;
+	width: 100%;
+	opacity: .8;
+}
+.errorPopup > .modal > p::before {
+	color: #0ff;
+	z-index: -1;
+	animation: glitch 1s cubic-bezier(.25, .46, .45, .94) both infinite;
+}
+.errorPopup > .modal > p::after {
+	color: #f0f;
+	z-index: -2;
+	animation: glitch .5s cubic-bezier(.25, .46, .45, .94) reverse both infinite;
+}
+
 /* Animation */
+@keyframes glitch {
+	0% {
+		transform: translate(0)
+	}
+	20% {
+		transform: translate(-3px, 3px)
+	}
+	40% {
+		transform: translate(-3px, -3px)
+	}
+	60% {
+		transform: translate(3px, 3px)
+	}
+	80% {
+		transform: translate(3px, -3px)
+	}
+	to {
+		transform: translate(0)
+	}
+}
+
 @keyframes anvil {
 	0% {
 		transform: scale(1) translateY(0px);

@@ -19,7 +19,7 @@ const ModalWindow: React.FC = () => {
   const [content, setContent] = useState<IContent>();
   const [puzzle, setPuzzle] = useState<IPuzzle>();
   const [error, setError] = useState<string>();
-  const [input, setInput] = useState<string>();
+  const [_, setInput] = useState<string>();
   const inputRef = useRef(null);
   const contentRef = useRef(content);
   contentRef.current = content;
@@ -39,49 +39,47 @@ const ModalWindow: React.FC = () => {
   useEffect(() => {
     // Get all puzzles by given topic
     getPuzzlesByTopic(topic).then(({ data, error }: IPuzzleResponse) => {
-      const content: IContent = {
+      const ncontent: IContent = {
         topic: topic,
         contents: data as IPuzzle[],
       };
-      setContent(content);
-      setPuzzle(content?.contents[0]);
 
       // Check and update completion on content puzzles
       getCompletedPuzzles().then((res: IPuzzleResponse) => {
         const data = res.data as ICompleted[];
         const error2 = res.error;
-        if (error || error2) {
-          setError("ERROR ON FETCH OF TOPIC/PUZZLES");
-        } else setError(null);
+        if (error || error2) setError("ERROR 404: CANNOT FETCH TOPICS");
+        else if (error !== null) setError(null);
         const completedPuzzles = data.map((item: ICompleted) => item.puzzle_id);
-        console.log(completedPuzzles, content, completedPuzzles);
-        content?.contents?.forEach((data) => {
+        console.log(completedPuzzles, ncontent, completedPuzzles);
+        ncontent?.contents?.forEach((data) => {
           data.completed = completedPuzzles.includes(data.id);
         });
-        setPuzzle(content?.contents[0]); // Update puzzle once again
+        setContent(ncontent);
+        setPuzzle(contentRef.current?.contents[0]); // Update puzzle once again
       });
     });
-    // 1 second timer fix
-    const timer = setTimeout(() => {
-      if (contentRef.current?.contents[0])
-        setPuzzle(contentRef.current?.contents[0]); // Update puzzle after timeout
-    }, 1000);
-    return () => clearTimeout(timer);
   }, [topic]);
 
   const add = () => {
-    const answer: string = input.trim();
-    addPuzzleComplete(puzzle.id, answer, user).then(({ data, error }) => {
-      if (data) {
-        puzzle.completed = true;
-        console.log("PLAY PUZZLE COMPLETE INSTANCE");
-      }
-      if (error && error?.message !== "") {
-        setError(error.message);
-        console.log("PLAY ERROR INSTANCE");
-      } else setError(null);
-      inputRef.current.value = "";
-    });
+    const answer: string = inputRef.current.value.trim();
+    if (answer !== "") {
+      addPuzzleComplete(puzzle.id, answer, user).then(({ data, error }) => {
+        if (data) {
+          puzzle.completed = true;
+          console.log("PLAY PUZZLE COMPLETE INSTANCE");
+        }
+        if (error && error?.message !== "") {
+          setError(
+            error.message === "Wrong flag!"
+              ? `ERROR 403: ${error.message}`
+              : error.message
+          );
+          console.log("PLAY ERROR INSTANCE", error.message);
+        } else setError(null);
+        inputRef.current.value = "";
+      });
+    }
   };
   const inputHandler = (event: any) => {
     setInput(event.target.value);
