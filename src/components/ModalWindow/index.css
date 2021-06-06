@@ -32,7 +32,7 @@
 .fog::after {
 	content: "";
 	transform: translate(-25%, 200px);
-	transition: transform 0.5s ease-in-out;
+	transition: transform 1s cubic-bezier(0.38, 0.1, 0.36, 0.9);
 	opacity: 0;
 	background: radial-gradient(rgba(232, 5, 5, 0.75) 5.7%, transparent 60%);
 }

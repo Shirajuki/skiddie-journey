@@ -19,7 +19,6 @@ const ModalWindow: React.FC = () => {
   const [content, setContent] = useState<IContent>();
   const [puzzle, setPuzzle] = useState<IPuzzle>();
   const [error, setError] = useState<string>();
-  const [_, setInput] = useState<string>();
   const inputRef = useRef(null);
   const contentRef = useRef(content);
   contentRef.current = content;
@@ -80,9 +79,6 @@ const ModalWindow: React.FC = () => {
         inputRef.current.value = "";
       });
     }
-  };
-  const inputHandler = (event: any) => {
-    setInput(event.target.value);
   };
 
   return (
@@ -193,7 +189,6 @@ const ModalWindow: React.FC = () => {
                         type="text"
                         ref={inputRef}
                         placeholder="skiddie{FLAG}"
-                        onChange={inputHandler}
                       />
                     )}
                     <button
